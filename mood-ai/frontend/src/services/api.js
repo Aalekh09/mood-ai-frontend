@@ -1,8 +1,13 @@
 import axios from 'axios';
 
-// ❌ NO localhost fallback in production
+const API_BASE_URL = process.env.REACT_APP_API_URL;
+
+if (!API_BASE_URL) {
+  throw new Error('REACT_APP_API_URL is not defined');
+}
+
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL,
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -33,13 +38,12 @@ api.interceptors.response.use(
   }
 );
 
-// Auth APIs
+// APIs
 export const authAPI = {
   register: (data) => api.post('/auth/register', data),
   login: (data) => api.post('/auth/login', data),
 };
 
-// Chat APIs
 export const chatAPI = {
   sendMessage: (data) => api.post('/chat/send', data),
   sendAnonymousMessage: (data) => api.post('/chat/anonymous', data),
@@ -47,15 +51,11 @@ export const chatAPI = {
   deleteChat: (chatId) => api.delete(`/chat/${chatId}`),
 };
 
-// Admin APIs
 export const adminAPI = {
   getAllUsers: () => api.get('/admin/users'),
   getAllChats: () => api.get('/admin/chats'),
   deleteUser: (userId) => api.delete(`/admin/users/${userId}`),
   deleteChat: (chatId) => api.delete(`/admin/chats/${chatId}`),
-  getAnalytics: () => api.get('/admin/analytics'),
-  getUserAnalytics: (userId) =>
-    api.get(`/admin/analytics/user/${userId}`),
 };
 
 export default api;
