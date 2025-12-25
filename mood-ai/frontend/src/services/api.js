@@ -1,10 +1,8 @@
 import axios from 'axios';
 
 const API_BASE_URL =
-  window.location.hostname === 'localhost'
-    ? 'http://localhost:8080/api'
-    : `http://${window.location.hostname}:8080/api`;
-
+  process.env.REACT_APP_API_URL ||
+  'http://localhost:8080/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -13,7 +11,7 @@ const api = axios.create({
   },
 });
 
-// Request interceptor to add token
+// Attach JWT token
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -22,12 +20,10 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Response interceptor for error handling
+// Handle 401 globally
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -61,7 +57,8 @@ export const adminAPI = {
   deleteUser: (userId) => api.delete(`/admin/users/${userId}`),
   deleteChat: (chatId) => api.delete(`/admin/chats/${chatId}`),
   getAnalytics: () => api.get('/admin/analytics'),
-  getUserAnalytics: (userId) => api.get(`/admin/analytics/user/${userId}`),
+  getUserAnalytics: (userId) =>
+    api.get(`/admin/analytics/user/${userId}`),
 };
 
 export default api;
